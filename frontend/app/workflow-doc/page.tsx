@@ -35,6 +35,7 @@ export default function WorkflowDocPage() {
   const [filterConfigStr, setFilterConfigStr] = useState('');
   const [fieldConfigStr, setFieldConfigStr] = useState('');
   const [templateStr, setTemplateStr] = useState('');
+  const [configCollapsed, setConfigCollapsed] = useState(false);
   const [workflows, setWorkflows] = useState<Record<string, unknown>[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -172,28 +173,42 @@ export default function WorkflowDocPage() {
       />
 
       <div className={styles.content}>
-        <div className={styles.configPanel}>
-          <ConfigEditor
-            label="Filter Config"
-            value={filterConfigStr}
-            onChange={handleFilterChange}
-            hasUnsavedChanges={hasUnsavedChanges && filterConfigStr !== ''}
-            error={filterError}
-            language="json"
-          />
-          <ConfigEditor
-            label="Field Config"
-            value={fieldConfigStr}
-            onChange={handleFieldChange}
-            hasUnsavedChanges={hasUnsavedChanges && fieldConfigStr !== ''}
-            error={fieldError}
-            language="json"
-          />
-          <TemplateEditor
-            value={templateStr}
-            onChange={handleTemplateChange}
-            hasUnsavedChanges={hasUnsavedChanges && templateStr !== ''}
-          />
+        <div className={`${styles.configPanel} ${configCollapsed ? styles.configPanelCollapsed : ''}`}>
+          <div className={styles.configPanelHeader}>
+            <button
+              className={styles.collapseToggle}
+              onClick={() => setConfigCollapsed(c => !c)}
+              title={configCollapsed ? 'Expand config panel' : 'Collapse config panel'}
+            >
+              {configCollapsed ? '▶' : '◀'}
+            </button>
+            {!configCollapsed && <span className={styles.configPanelTitle}>Config</span>}
+          </div>
+          {!configCollapsed && (
+            <div className={styles.configPanelContent}>
+              <ConfigEditor
+                label="Filter Config"
+                value={filterConfigStr}
+                onChange={handleFilterChange}
+                hasUnsavedChanges={hasUnsavedChanges && filterConfigStr !== ''}
+                error={filterError}
+                language="json"
+              />
+              <ConfigEditor
+                label="Field Config"
+                value={fieldConfigStr}
+                onChange={handleFieldChange}
+                hasUnsavedChanges={hasUnsavedChanges && fieldConfigStr !== ''}
+                error={fieldError}
+                language="json"
+              />
+              <TemplateEditor
+                value={templateStr}
+                onChange={handleTemplateChange}
+                hasUnsavedChanges={hasUnsavedChanges && templateStr !== ''}
+              />
+            </div>
+          )}
         </div>
 
         <div className={styles.previewPanel}>

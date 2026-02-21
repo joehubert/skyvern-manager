@@ -7,6 +7,7 @@ import styles from './NavSidebar.module.css';
 const navItems = [
   { label: 'Workflow Doc', href: '/workflow-doc' },
   { label: 'Run Analytics', href: '/run-analytics' },
+  { label: 'Workflow Run Explorer', href: '/workflow-run-explorer' },
 ];
 
 export default function NavSidebar() {

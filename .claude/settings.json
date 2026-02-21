@@ -7,10 +7,19 @@
       "Bash(node -e:*)",
       "Bash(git -C /Users/joe/Documents/projects/skyvern-manager/frontend log --oneline -5)",
       "Bash(git -C /Users/joe/Documents/projects/skyvern-manager log --oneline -5)",
-      "Bash(git -C /Users/joe/Documents/projects/skyvern-manager status --short)"
+      "Bash(git -C /Users/joe/Documents/projects/skyvern-manager status --short)",
+      "Bash(timeout 8 npm run dev:server:*)",
+      "Bash(gtimeout 8 npm run dev:server:*)",
+      "Bash(lsof:*)",
+      "Bash(/Users/joe/Documents/projects/skyvern-manager/server/node_modules/.bin/tsx:*)",
+      "Read(//Users/joe/.cache/puppeteer/**)",
+      "Bash(kill:*)",
+      "Bash(node_modules/.bin/tsc:*)",
+      "Bash(npm uninstall:*)"
     ],
     "additionalDirectories": [
-      "/Users/joe/Documents/projects/skyvern-manager/frontend/.git"
+      "/Users/joe/Documents/projects/skyvern-manager/frontend/.git",
+      "/Users/joe/Documents/projects/skyvern-manager/server"
     ]
   }
 }

@@ -135,6 +135,52 @@ export interface RunAnalyticsSettings {
   cutoff_timestamp: string;
 }
 
+// --- Workflow Run Explorer ---
+
+export interface WorkflowRun {
+  workflow_run_id: string;
+  workflow_id: string;
+  workflow_permanent_id: string | null;
+  organization_id: string;
+  browser_session_id: string | null;
+  browser_profile_id: string | null;
+  debug_session_id: string | null;
+  status: string;
+  extra_http_headers: Record<string, string> | null;
+  proxy_location: string | null;
+  webhook_callback_url: string | null;
+  webhook_failure_reason: string | null;
+  totp_verification_url: string | null;
+  totp_identifier: string | null;
+  failure_reason: string | null;
+  parent_workflow_run_id: string | null;
+  workflow_title: string | null;
+  max_screenshot_scrolls: number | null;
+  browser_address: string | null;
+  run_with: string | null;
+  script_run: unknown | null;
+  job_id: string | null;
+  depends_on_workflow_run_id: string | null;
+  sequential_key: string | null;
+  ai_fallback: boolean | null;
+  code_gen: unknown | null;
+  waiting_for_verification_code: boolean | null;
+  verification_code_identifier: string | null;
+  verification_code_polling_started_at: string | null;
+  queued_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  created_at: string;
+  modified_at: string;
+}
+
+export interface WorkflowRunsResponse {
+  runs: WorkflowRun[];
+  page: number;
+  page_size: number;
+  has_more: boolean;
+}
+
 // --- Run Analytics: Aggregated output ---
 
 export interface WorkflowRunSummary {

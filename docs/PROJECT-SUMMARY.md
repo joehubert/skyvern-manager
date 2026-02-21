@@ -121,6 +121,22 @@ Fetches workflows from the Skyvern API and renders them as structured documentat
 
 ---
 
+### Workflow Run Explorer
+**Route:** `/workflow-run-explorer`
+**Status:** Complete
+
+Fetches a paginated list of workflow runs from the Skyvern API and displays them in a
+sortable table. Runs with statuses defined in `WORKFLOW_RUN_EXCLUDED_STATUSES` are filtered
+out client-side. Clicking a run opens an inline detail panel with:
+- A dot-notation JSON path inspector with autocomplete suggestions.
+- A scrollable read-only view of the full raw run object with a copy-to-clipboard button.
+
+**Key env vars:** `WORKFLOW_RUN_PAGE_SIZE`, `WORKFLOW_RUN_EXCLUDED_STATUSES`
+**Key backend route:** `server/src/routes/workflowRuns.ts`
+**Key frontend utility:** `frontend/lib/dotPath.ts`
+
+---
+
 ## Adding a New Feature
 
 1. Add a route entry in `NavSidebar.tsx`.
