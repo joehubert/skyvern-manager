@@ -1,0 +1,61 @@
+I'm going to use AI to create a software project called Skyvern-manager.
+It will provide utility features to users of the Skyvern (skyvern.com) cloud platform.
+The application will have a server written in TypeScript that provides the API.
+The front end will be written with Next.js.
+
+The UI layout will be a typical: left hand naviation, right hand content pattern.
+
+I am going to start with one feature that will be labeled Workflow Doc in the navigation panel.
+In summary, this feature will:
+* Collect all the workflows from Skyvern cloud, given a filter config to select certain workflows, and a field config to select certain fields in the workflow object, possibly filtered by parameters of.
+* These filters configs will be editable from the front end as simple json structures.
+* For example, the filter to select certain workflows might look like this:
+{ 
+    status : "published",
+    folder_id : ["fld_aabbccdddeee"]
+}
+* The config for included fields could look like this:
+{
+  "fields": [
+    "workflow_permanent_id",
+    "title",
+    "description",
+    "workflow_definition.parameters.key",
+    "workflow_definition.parameters.description",
+    "workflow_definition.parameters.workflow_parameter_type"
+    "webhook_callback_url"
+
+  ],
+  "filters": [
+    {
+      "field": "workflow_definition.parameters.parameter_type",
+      "operator": "eq",
+      "value": "workflow"
+    }
+  ]
+}
+* The feature will support an html template that will drive the rendering of the output (each workflow entry.) I will rely on the AI to build a good template but the basic idea is something like this:
+<div class="title">{title}</div>
+<div class="description">{description}</div>
+<table>
+<tr>
+<td class="param_key">{workflow_definition.parameters.key}</td>
+<td class="param_type">{workflow_definition.parameters.parameter_type}</td>
+<td class="param_description">{workflow_definition.parameters.descriptiony}</td>
+</tr>
+</table>
+<div class="webhook_callback_url>{webhook_callback_url}</div>
+* The template will be editable in the UI.
+* The project will include an appropriate stylesheet that will be managed outside of the features of this project.
+
+Here are some resources that will help you:
+* Attached files (to this project) for the workflows and workflow json schema.
+* Links to Skyvern API documentation:
+    * https://www.skyvern.com/docs/api-reference/api-reference/workflows/get-workflows
+    * https://www.skyvern.com/docs/api-reference/api-reference/workflows/get-workflow
+
+* Skyvern API calls require and API key which will be stored in an environment file.
+
+Your goal is to create a series of documents that will effectively guide Claude Code in the creation of this project.
+Ask me any clarifying questions necessary to optimize your output. 
+When you have everything you need, generate the instruction files.

@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WorkflowArray",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "workflow_id": { "type": "string" },
+      "organization_id": { "type": "string" },
+      "title": { "type": "string" },
+      "workflow_permanent_id": { "type": "string" },
+      "version": { "type": "integer" },
+      "is_saved_task": { "type": "boolean" },
+      "is_template": { "type": "boolean" },
+      "description": { "type": "string" },
+      "workflow_definition": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "integer" },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "parameter_type": { "type": "string", "enum": ["output", "workflow"] },
+                "key": { "type": "string" },
+                "description": { "type": "string" },
+                "output_parameter_id": { "type": ["string", "null"] },
+                "workflow_parameter_id": { "type": ["string", "null"] },
+                "workflow_parameter_type": { "type": ["string", "null"] },
+                "workflow_id": { "type": "string" },
+                "default_value": { "type": ["string", "null", "number", "boolean"] },
+                "created_at": { "type": "string", "format": "date-time" },
+                "modified_at": { "type": "string", "format": "date-time" },
+                "deleted_at": { "type": ["string", "null"], "format": "date-time" }
+              },
+              "required": ["parameter_type", "key", "workflow_id"]
+            }
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string" },
+                "next_block_label": { "type": ["string", "null"] },
+                "block_type": { "type": "string" },
+                "output_parameter": { "type": ["object", "null"] },
+                "continue_on_failure": { "type": "boolean" },
+                "model": {
+                  "type": "object",
+                  "properties": {
+                    "model_name": { "type": "string" }
+                  }
+                },
+                "disable_cache": { "type": "boolean" },
+                "next_loop_on_failure": { "type": "boolean" },
+                "task_type": { "type": "string" },
+                "url": { "type": "string", "format": "uri" },
+                "title": { "type": "string" },
+                "engine": { "type": "string" },
+                "complete_criterion": { "type": "string" },
+                "terminate_criterion": { "type": "string" },
+                "navigation_goal": { "type": "string" },
+                "data_extraction_goal": { "type": ["string", "null"] },
+                "data_schema": { "type": ["object", "null"] },
+                "error_code_mapping": { "type": ["object", "null"] },
+                "max_retries": { "type": "integer" },
+                "max_steps_per_run": { "type": ["integer", "null"] },
+                "parameters": { "type": "array" },
+                "complete_on_download": { "type": "boolean" },
+                "download_suffix": { "type": ["string", "null"] },
+                "totp_verification_url": { "type": ["string", "null"] },
+                "totp_identifier": { "type": ["string", "null"] },
+                "complete_verification": { "type": "boolean" },
+                "include_action_history_in_verification": { "type": "boolean" },
+                "download_timeout": { "type": ["integer", "null"] }
+              }
+            }
+          },
+          "finally_block_label": { "type": ["string", "null"] }
+        },
+        "required": ["version", "parameters", "blocks"]
+      },
+      "proxy_location": { "type": "string" },
+      "webhook_callback_url": { "type": "string" },
+      "totp_verification_url": { "type": ["string", "null"] },
+      "totp_identifier": { "type": ["string", "null"] },
+      "persist_browser_session": { "type": "boolean" },
+      "model": { "type": ["string", "null"] },
+      "status": { "type": "string" },
+      "max_screenshot_scrolls": { "type": ["integer", "null"] },
+      "extra_http_headers": { "type": "object" },
+      "run_with": { "type": "string" },
+      "ai_fallback": { "type": "boolean" },
+      "cache_key": { "type": "string" },
+      "run_sequentially": { "type": "boolean" },
+      "sequential_key": { "type": ["string", "null"] },
+      "folder_id": { "type": ["string", "null"] },
+      "import_error": { "type": ["string", "null"] },
+      "created_at": { "type": "string", "format": "date-time" },
+      "modified_at": { "type": "string", "format": "date-time" },
+      "deleted_at": { "type": ["string", "null"], "format": "date-time" }
+    },
+    "required": [
+      "workflow_id",
+      "organization_id",
+      "title",
+      "workflow_definition",
+      "status",
+      "created_at"
+    ]
+  }
+}

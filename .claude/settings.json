@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo:*)",
+      "Bash(timeout 8 npx tsx:*)",
+      "Bash(node_modules/.bin/tsx:*)",
+      "Bash(node -e:*)"
+    ]
+  }
+}

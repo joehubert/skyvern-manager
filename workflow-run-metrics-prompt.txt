@@ -1,0 +1,46 @@
+I'm going to use AI to create a software project called Skyvern-manager.
+It will provide utility features to users of the Skyvern (skyvern.com) cloud platform.
+The application will have a server written in TypeScript that provides the API.
+The front end will be written with Next.js.
+
+The UI layout will be a typical: left hand naviation, right hand content pattern.
+
+Also see the file attached to this project: PROJECCT-SUMMARY.md
+
+In summary, this feature will:
+* Collect the workflow runs from Skyvern cloud.
+   * .env will have a collection of run status to exclude, by default: queued, running
+* The .env file will include parameters for the page size for the workflow run connection which is an API parameter.
+* Since the filtering for the "list workflow runs" with Skyvern is limited, there will be client-side filtering of the runs after they are returned by the API. This filtering includes:
+   * By started_at timestamp: 
+       * the user will provide a cut off timestamp and any runs prior to that cut off will not be kept in the resultset
+       * Note that the API returns most recent runs first. With each page of results returned, the client-side logic will see if the earliest run in the set if prior to the cut off timestamp. If so, no subsequent pages need to be fetched from the Skyvern API.
+    * By workflow_permanent_id:
+        * There will be a configurable filter for workflow that will drive a getWorkflows API call. For example, the filter to select certain workflows might look like this:
+```
+{ 
+    status : "published",
+    folder_id : ["fld_aabbccdddeee"]
+}
+```
+        * The client-side filtering of workflow runs will filter out any that do not have a workflow_permanent_id in the set driven by workflow collection.
+
+Once the working set of workflow runs has been refined, subsequent client-side logic will aggregate them by workflow_title. These properties will be in the aggregated set:
+* Total Count - number of instances of the workflow run for each workflow_title in the set.
+* Completed Count - number of instances of the workflow run for each workflow_title in the set where status = completed
+* Unsuccessful count - number of instances of the workflow run for each workflow_title in the set where the status is any of: failed, terminated, canceled, timed_out
+* Average run time - (finished_at - started_at) / Completed Count
+* Max run time - maximum (finished_at - started_at) where status = completed
+* Min run time - minimum (finished_at - started_at) where status = completed
+
+Here are some resources that will help you:
+* Attached files (to this project) for the workflow runs and workflow json schema.
+* Links to Skyvern API documentation:
+    * https://www.skyvern.com/docs/api-reference/api-reference/workflows/get-workflows
+    * https://www.skyvern.com/docs/api-reference/api-reference/workflow-runs/get-workflow-runs
+
+* Skyvern API calls require and API key which is stored in .env file: SKYVERN_API_KEY
+
+Your goal is to create a series of documents that will effectively guide Claude Code in the creation of this project.
+Ask me any clarifying questions necessary to optimize your output. 
+When you have everything you need, generate the instruction files.

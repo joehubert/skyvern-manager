@@ -1,0 +1,18 @@
+{
+  "fields": [
+    "workflow_permanent_id",
+    "title",
+    "description",
+    "workflow_definition.parameters.key",
+    "workflow_definition.parameters.description",
+    "workflow_definition.parameters.workflow_parameter_type",
+    "webhook_callback_url"
+  ],
+  "filters": [
+    {
+      "field": "workflow_definition.parameters.parameter_type",
+      "operator": "eq",
+      "value": "workflow"
+    }
+  ]
+}

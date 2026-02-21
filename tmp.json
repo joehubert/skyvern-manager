@@ -1,0 +1,17 @@
+{
+    "fields": [
+        "workflow_permanent_id",
+        "title",
+        "description",
+        "workflow_definition.parameters.key",
+        "workflow_definition.parameters.type",
+        "workflow_definition.parameters.key",
+    ],
+    "filters": {
+        "fields": [
+            "workflow_definition.parameters": "filter"[
+                "workflow_definition.parameters.parameter_type": "workflow"
+            ]
+        }
+    }
+}

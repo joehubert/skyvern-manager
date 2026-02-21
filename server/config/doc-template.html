@@ -1,0 +1,33 @@
+<div class="workflow-entry">
+  <div class="workflow-header">
+    <h2 class="workflow-title">{title}</h2>
+    <div class="workflow-id">{workflow_permanent_id}</div>
+  </div>
+
+  <div class="workflow-description">{description}</div>
+
+  {{#each workflow_definition.parameters}}
+  <table class="params-table">
+    <thead>
+      <tr>
+        <th>Parameter</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="param-key">{key}</td>
+        <td class="param-type">{workflow_parameter_type}</td>
+        <td class="param-description">{description}</td>
+      </tr>
+    </tbody>
+  </table>
+  {{/each}}
+
+  <div class="workflow-webhook">
+    <span class="label">Webhook:</span>
+    <span class="value">{webhook_callback_url}</span>
+  </div>
+</div>
+<hr class="workflow-divider" />
