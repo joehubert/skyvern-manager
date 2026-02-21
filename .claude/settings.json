@@ -4,7 +4,13 @@
       "Bash(echo:*)",
       "Bash(timeout 8 npx tsx:*)",
       "Bash(node_modules/.bin/tsx:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(git -C /Users/joe/Documents/projects/skyvern-manager/frontend log --oneline -5)",
+      "Bash(git -C /Users/joe/Documents/projects/skyvern-manager log --oneline -5)",
+      "Bash(git -C /Users/joe/Documents/projects/skyvern-manager status --short)"
+    ],
+    "additionalDirectories": [
+      "/Users/joe/Documents/projects/skyvern-manager/frontend/.git"
     ]
   }
 }

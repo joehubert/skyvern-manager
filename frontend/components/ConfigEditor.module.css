@@ -1,0 +1,48 @@
+.editorSection {
+  margin-bottom: 24px;
+}
+
+.label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fafafa;
+  color: #1a1a1a;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s, border-left-width 0.15s;
+}
+
+.textarea:focus {
+  border-color: #888;
+  background-color: #fff;
+}
+
+.textarea.unsaved {
+  border-left: 3px solid #f59e0b;
+}
+
+.textarea.hasError {
+  border-color: #ef4444;
+}
+
+.error {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #ef4444;
+}
