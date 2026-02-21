@@ -307,18 +307,6 @@ export default function RunAnalyticsPage() {
         >
           Export CSV
         </button>
-        <button
-          onClick={() => { window.location.href = '/api/run-analytics/export/pdf'; }}
-          disabled={summaries.length === 0}
-          style={{
-            padding: '7px 16px',
-            fontSize: '13px',
-            cursor: summaries.length === 0 ? 'not-allowed' : 'pointer',
-            opacity: summaries.length === 0 ? 0.5 : 1,
-          }}
-        >
-          Export PDF
-        </button>
       </div>
 
       {/* Results table */}

@@ -13,7 +13,6 @@ import {
   getTemplate,
   saveTemplate,
   getWorkflows,
-  exportPdf,
 } from '../../lib/api';
 import { renderAllWorkflows } from '../../lib/templateRenderer';
 import styles from './page.module.css';
@@ -130,21 +129,6 @@ export default function WorkflowDocPage() {
     }
   };
 
-  const handleExportPdf = async () => {
-    try {
-      const blob = await exportPdf();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'workflow-doc.pdf';
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('PDF exported', 'success');
-    } catch (err) {
-      showToast(`Failed to export PDF: ${(err as Error).message}`, 'error');
-    }
-  };
-
   const handleCopyHtml = async () => {
     try {
       const html = renderAllWorkflows(templateStr, workflows);
@@ -165,7 +149,6 @@ export default function WorkflowDocPage() {
       <DocToolbar
         onRefresh={handleRefresh}
         onSave={handleSave}
-        onExportPdf={handleExportPdf}
         onCopyHtml={handleCopyHtml}
         isSaving={isSaving}
         isRefreshing={isRefreshing}

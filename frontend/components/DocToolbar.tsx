@@ -5,7 +5,6 @@ import styles from './DocToolbar.module.css';
 interface DocToolbarProps {
   onRefresh: () => void;
   onSave: () => void;
-  onExportPdf: () => void;
   onCopyHtml: () => void;
   isSaving: boolean;
   isRefreshing: boolean;
@@ -19,7 +18,6 @@ function Spinner() {
 export default function DocToolbar({
   onRefresh,
   onSave,
-  onExportPdf,
   onCopyHtml,
   isSaving,
   isRefreshing,
@@ -42,9 +40,6 @@ export default function DocToolbar({
       >
         {isSaving && <Spinner />}
         Save Configs
-      </button>
-      <button className={styles.btn} onClick={onExportPdf}>
-        Export PDF
       </button>
       <button className={styles.btn} onClick={onCopyHtml}>
         Copy HTML
