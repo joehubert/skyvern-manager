@@ -4,6 +4,7 @@ import {
   SkyvernWorkflowRun,
   WorkflowFilterConfig,
   WorkflowRunSummary,
+  WorkflowStatusRow,
 } from '../types';
 
 function getBaseUrl(): string {
@@ -124,48 +125,51 @@ export async function fetchFilteredRuns(
   });
 }
 
-// Step 3 — aggregate runs into per-workflow summaries
+// Step 3 — aggregate runs into per-workflow summaries with per-status sub-rows
 export function aggregateRuns(runs: SkyvernWorkflowRun[]): WorkflowRunSummary[] {
-  const UNSUCCESSFUL_STATUSES = new Set(['failed', 'terminated', 'canceled', 'timed_out']);
-
-  const groups = new Map<string, SkyvernWorkflowRun[]>();
+  const titleGroups = new Map<string, SkyvernWorkflowRun[]>();
   for (const run of runs) {
     const title = run.workflow_title ?? '(Untitled)';
-    if (!groups.has(title)) groups.set(title, []);
-    groups.get(title)!.push(run);
+    if (!titleGroups.has(title)) titleGroups.set(title, []);
+    titleGroups.get(title)!.push(run);
   }
 
   const summaries: WorkflowRunSummary[] = [];
 
-  for (const [workflow_title, group] of groups) {
-    const total_count = group.length;
-    const completed_count = group.filter((r) => r.status === 'completed').length;
-    const unsuccessful_count = group.filter((r) => UNSUCCESSFUL_STATUSES.has(r.status)).length;
+  for (const [workflow_title, group] of titleGroups) {
+    const statusGroups = new Map<string, SkyvernWorkflowRun[]>();
+    for (const run of group) {
+      if (!statusGroups.has(run.status)) statusGroups.set(run.status, []);
+      statusGroups.get(run.status)!.push(run);
+    }
 
-    const durations = group
-      .filter((r) => r.status === 'completed' && r.started_at && r.finished_at)
-      .map(
-        (r) =>
-          (new Date(r.finished_at!).getTime() - new Date(r.started_at!).getTime()) / 1000
-      );
+    const status_rows: WorkflowStatusRow[] = [];
+    for (const [status, statusGroup] of statusGroups) {
+      const durations = statusGroup
+        .filter((r) => r.started_at && r.finished_at)
+        .map(
+          (r) =>
+            (new Date(r.finished_at!).getTime() - new Date(r.started_at!).getTime()) / 1000
+        );
 
-    const avg_run_time_seconds =
-      durations.length > 0
-        ? durations.reduce((sum, d) => sum + d, 0) / durations.length
-        : null;
-    const max_run_time_seconds =
-      durations.length > 0 ? Math.max(...durations) : null;
-    const min_run_time_seconds =
-      durations.length > 0 ? Math.min(...durations) : null;
+      status_rows.push({
+        status,
+        count: statusGroup.length,
+        avg_run_time_seconds:
+          durations.length > 0
+            ? durations.reduce((sum, d) => sum + d, 0) / durations.length
+            : null,
+        max_run_time_seconds: durations.length > 0 ? Math.max(...durations) : null,
+        min_run_time_seconds: durations.length > 0 ? Math.min(...durations) : null,
+      });
+    }
+
+    status_rows.sort((a, b) => b.count - a.count);
 
     summaries.push({
       workflow_title,
-      total_count,
-      completed_count,
-      unsuccessful_count,
-      avg_run_time_seconds,
-      max_run_time_seconds,
-      min_run_time_seconds,
+      total_count: group.length,
+      status_rows,
     });
   }
 

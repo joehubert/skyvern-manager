@@ -4,9 +4,7 @@
     <div class="workflow-id">{workflow_permanent_id}</div>
   </div>
 
-  <div class="workflow-description">{description}</div>
-
-  {{#each workflow_definition.parameters}}
+  <div class="workflow-description"><span class="label">Description:&nbsp;</span>{description}</div>
   <table class="params-table">
     <thead>
       <tr>
@@ -16,15 +14,17 @@
       </tr>
     </thead>
     <tbody>
+  {{#each workflow_definition.parameters}}
+
       <tr>
         <td class="param-key">{key}</td>
         <td class="param-type">{workflow_parameter_type}</td>
         <td class="param-description">{description}</td>
       </tr>
+
+  {{/each}}
     </tbody>
   </table>
-  {{/each}}
-
   <div class="workflow-webhook">
     <span class="label">Webhook:</span>
     <span class="value">{webhook_callback_url}</span>

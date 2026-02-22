@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { WorkflowRun, WorkflowRunsResponse } from '../../lib/types';
-import { fetchWorkflowRuns } from '../../lib/api';
+import { fetchWorkflowRuns, fetchWorkflowRun } from '../../lib/api';
 import { resolveDotPath } from '../../lib/dotPath';
 
 // Status badge colour map
@@ -46,7 +46,7 @@ function truncateRunId(id: string): string {
 }
 
 // Autocomplete: get suggested keys from an object given a partial dot-path
-function getSuggestions(run: WorkflowRun, input: string): string[] {
+function getSuggestions(run: Record<string, unknown>, input: string): string[] {
   try {
     const dotIdx = input.lastIndexOf('.');
     if (dotIdx === -1) {
@@ -73,10 +73,16 @@ function getSuggestions(run: WorkflowRun, input: string): string[] {
 }
 
 function DetailPanel({
-  run,
+  listRun,
+  detailRun,
+  detailLoading,
+  detailError,
   onClose,
 }: {
-  run: WorkflowRun;
+  listRun: WorkflowRun;
+  detailRun: Record<string, unknown> | null;
+  detailLoading: boolean;
+  detailError: string | null;
   onClose: () => void;
 }) {
   const [pathInput, setPathInput] = useState('');
@@ -88,9 +94,12 @@ function DetailPanel({
 
   const isUnset = typeof resolvedValue === 'symbol';
 
+  // The object used for inspection — fall back to list item while detail is loading
+  const inspectTarget = detailRun ?? (listRun as unknown as Record<string, unknown>);
+
   function handlePathChange(val: string) {
     setPathInput(val);
-    const s = getSuggestions(run, val);
+    const s = getSuggestions(inspectTarget, val);
     setSuggestions(s);
     setShowSuggestions(s.length > 0);
   }
@@ -103,7 +112,7 @@ function DetailPanel({
   }
 
   function handleGetValue() {
-    const result = resolveDotPath(run, pathInput);
+    const result = resolveDotPath(inspectTarget, pathInput);
     setResolvedValue(result);
     setShowSuggestions(false);
   }
@@ -123,13 +132,14 @@ function DetailPanel({
   }
 
   function handleCopy() {
-    navigator.clipboard.writeText(JSON.stringify(run, null, 2)).then(() => {
+    const json = detailRun ? JSON.stringify(detailRun, null, 2) : '';
+    navigator.clipboard.writeText(json).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   }
 
-  const title = run.workflow_title ?? run.workflow_run_id;
+  const title = listRun.workflow_title ?? listRun.workflow_run_id;
 
   return (
     <div
@@ -247,14 +257,15 @@ function DetailPanel({
 
         <button
           onClick={handleGetValue}
+          disabled={detailLoading}
           style={{
             alignSelf: 'flex-start',
             padding: '4px 14px',
-            background: '#2563eb',
+            background: detailLoading ? '#93c5fd' : '#2563eb',
             color: '#fff',
             border: 'none',
             borderRadius: '4px',
-            cursor: 'pointer',
+            cursor: detailLoading ? 'not-allowed' : 'pointer',
             fontSize: '0.8rem',
             fontWeight: 600,
           }}
@@ -298,13 +309,14 @@ function DetailPanel({
           </div>
           <button
             onClick={handleCopy}
+            disabled={!detailRun}
             style={{
               padding: '3px 10px',
               background: copied ? '#059669' : '#f3f4f6',
               color: copied ? '#fff' : '#374151',
               border: '1px solid #d1d5db',
               borderRadius: '4px',
-              cursor: 'pointer',
+              cursor: detailRun ? 'pointer' : 'not-allowed',
               fontSize: '0.75rem',
               fontWeight: 600,
               transition: 'background 0.15s',
@@ -313,23 +325,40 @@ function DetailPanel({
             {copied ? 'Copied!' : 'Copy JSON'}
           </button>
         </div>
-        <pre
-          style={{
-            margin: 0,
-            maxHeight: '400px',
-            overflowY: 'auto',
-            fontFamily: 'monospace',
-            fontSize: '0.72rem',
-            background: '#f9fafb',
-            border: '1px solid #e5e7eb',
-            borderRadius: '4px',
-            padding: '8px',
-            wordBreak: 'break-all',
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          {JSON.stringify(run, null, 2)}
-        </pre>
+        {detailLoading ? (
+          <div style={{ color: '#6b7280', fontSize: '0.875rem', padding: '8px 0' }}>Loading…</div>
+        ) : detailError ? (
+          <div
+            style={{
+              padding: '8px',
+              background: '#fee2e2',
+              border: '1px solid #fca5a5',
+              borderRadius: '4px',
+              color: '#991b1b',
+              fontSize: '0.8rem',
+            }}
+          >
+            {detailError}
+          </div>
+        ) : (
+          <pre
+            style={{
+              margin: 0,
+              maxHeight: '400px',
+              overflowY: 'auto',
+              fontFamily: 'monospace',
+              fontSize: '0.72rem',
+              background: '#f9fafb',
+              border: '1px solid #e5e7eb',
+              borderRadius: '4px',
+              padding: '8px',
+              wordBreak: 'break-all',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            {detailRun ? JSON.stringify(detailRun, null, 2) : ''}
+          </pre>
+        )}
       </div>
     </div>
   );
@@ -342,6 +371,9 @@ export default function WorkflowRunExplorerPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedRun, setSelectedRun] = useState<WorkflowRun | null>(null);
+  const [detailRun, setDetailRun] = useState<Record<string, unknown> | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   async function loadPage(p: number) {
     setLoading(true);
@@ -353,10 +385,33 @@ export default function WorkflowRunExplorerPage() {
       setHasMore(data.has_more);
       // Clear selection when navigating pages
       setSelectedRun(null);
+      setDetailRun(null);
+      setDetailError(null);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load runs');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleRowClick(run: WorkflowRun) {
+    if (selectedRun?.workflow_run_id === run.workflow_run_id) {
+      setSelectedRun(null);
+      setDetailRun(null);
+      setDetailError(null);
+      return;
+    }
+    setSelectedRun(run);
+    setDetailRun(null);
+    setDetailError(null);
+    setDetailLoading(true);
+    try {
+      const data = await fetchWorkflowRun(run.workflow_run_id);
+      setDetailRun(data);
+    } catch (err: unknown) {
+      setDetailError(err instanceof Error ? err.message : 'Failed to load run detail');
+    } finally {
+      setDetailLoading(false);
     }
   }
 
@@ -432,7 +487,7 @@ export default function WorkflowRunExplorerPage() {
                   return (
                     <tr
                       key={run.workflow_run_id}
-                      onClick={() => setSelectedRun(isActive ? null : run)}
+                      onClick={() => handleRowClick(run)}
                       style={{
                         borderBottom: '1px solid #f3f4f6',
                         cursor: 'pointer',
@@ -521,7 +576,17 @@ export default function WorkflowRunExplorerPage() {
 
         {/* Right: Detail Panel */}
         {selectedRun && (
-          <DetailPanel run={selectedRun} onClose={() => setSelectedRun(null)} />
+          <DetailPanel
+            listRun={selectedRun}
+            detailRun={detailRun}
+            detailLoading={detailLoading}
+            detailError={detailError}
+            onClose={() => {
+              setSelectedRun(null);
+              setDetailRun(null);
+              setDetailError(null);
+            }}
+          />
         )}
       </div>
     </div>

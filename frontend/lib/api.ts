@@ -1,4 +1,4 @@
-import { FilterConfig, FieldConfig, RunAnalyticsSettings, WorkflowFilterConfig, WorkflowRunSummary, WorkflowRun, WorkflowRunsResponse } from './types';
+import { FilterConfig, FieldConfig, RunAnalyticsSettings, WorkflowFilterConfig, WorkflowRunSummary, WorkflowRunsResponse } from './types';
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, options);
@@ -127,7 +127,7 @@ export async function fetchWorkflowRuns(page: number): Promise<WorkflowRunsRespo
   return res.json();
 }
 
-export async function fetchWorkflowRun(runId: string): Promise<WorkflowRun> {
+export async function fetchWorkflowRun(runId: string): Promise<Record<string, unknown>> {
   const res = await fetch(`/api/workflow-runs/${encodeURIComponent(runId)}`);
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

@@ -79,12 +79,16 @@ export interface RunAnalyticsSettings {
   cutoff_timestamp: string;
 }
 
-export interface WorkflowRunSummary {
-  workflow_title: string;
-  total_count: number;
-  completed_count: number;
-  unsuccessful_count: number;
+export interface WorkflowStatusRow {
+  status: string;
+  count: number;
   avg_run_time_seconds: number | null;
   max_run_time_seconds: number | null;
   min_run_time_seconds: number | null;
+}
+
+export interface WorkflowRunSummary {
+  workflow_title: string;
+  total_count: number;
+  status_rows: WorkflowStatusRow[];
 }

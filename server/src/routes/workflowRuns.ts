@@ -71,10 +71,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/workflow-runs/:runId
-// NOTE: Direct URL navigation to a run detail is not a primary use case.
-// This endpoint scans pages sequentially (up to 10) to find the run — this is a
-// best-effort fallback. Users normally arrive at the detail panel by clicking a row,
-// which passes the full run object via React state without hitting this endpoint.
+// Fetches the full run detail from /v1/runs/{runId}
 router.get('/:runId', async (req, res) => {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -83,30 +80,15 @@ router.get('/:runId', async (req, res) => {
   }
 
   const { runId } = req.params;
-  const pageSize = getPageSize();
-  const MAX_PAGES = 10;
 
   try {
-    for (let page = 1; page <= MAX_PAGES; page++) {
-      const response = await axios.get<WorkflowRun[]>(
-        `${getBaseUrl()}/workflows/runs`,
-        {
-          headers: { 'x-api-key': apiKey },
-          params: { page, page_size: pageSize },
-        }
-      );
-
-      const batch = response.data;
-      const found = batch.find((run) => run.workflow_run_id === runId);
-      if (found) {
-        res.json(found);
-        return;
+    const response = await axios.get(
+      `${getBaseUrl()}/runs/${encodeURIComponent(runId)}`,
+      {
+        headers: { 'x-api-key': apiKey },
       }
-
-      if (batch.length < pageSize) break;
-    }
-
-    res.status(404).json({ error: 'Run not found' });
+    );
+    res.json(response.data);
   } catch (err: unknown) {
     if (axios.isAxiosError(err) && err.response) {
       res.status(502).json({ error: 'Skyvern API error', status: err.response.status });

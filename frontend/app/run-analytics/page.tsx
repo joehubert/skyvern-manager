@@ -10,7 +10,7 @@ import {
 } from '../../lib/api';
 import { RunAnalyticsSettings, WorkflowFilterConfig, WorkflowRunSummary } from '../../lib/types';
 
-type SortKey = keyof WorkflowRunSummary;
+type SortKey = 'workflow_title' | 'total_count';
 
 function formatDuration(seconds: number | null): string {
   if (seconds === null) return '—';
@@ -33,24 +33,28 @@ function exportCsv(summaries: WorkflowRunSummary[]) {
   const header = [
     'Workflow Title',
     'Total Runs',
-    'Completed',
-    'Unsuccessful',
+    'Status',
+    'Count',
     'Avg Run Time (s)',
     'Max Run Time (s)',
     'Min Run Time (s)',
   ].join(',');
 
-  const rows = summaries.map((s) =>
-    [
-      `"${s.workflow_title.replace(/"/g, '""')}"`,
-      s.total_count,
-      s.completed_count,
-      s.unsuccessful_count,
-      s.avg_run_time_seconds ?? '',
-      s.max_run_time_seconds ?? '',
-      s.min_run_time_seconds ?? '',
-    ].join(',')
-  );
+  const rows: string[] = [];
+  for (const s of summaries) {
+    rows.push([`"${s.workflow_title.replaceAll('"', '""')}"`, s.total_count, '', '', '', '', ''].join(','));
+    for (const r of s.status_rows) {
+      rows.push([
+        '',
+        '',
+        `"${r.status}"`,
+        r.count,
+        r.avg_run_time_seconds ?? '',
+        r.max_run_time_seconds ?? '',
+        r.min_run_time_seconds ?? '',
+      ].join(','));
+    }
+  }
 
   const csv = [header, ...rows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -151,8 +155,8 @@ export default function RunAnalyticsPage() {
 
   const sorted = useMemo(() => {
     return [...summaries].sort((a, b) => {
-      const av = a[sortKey] ?? -Infinity;
-      const bv = b[sortKey] ?? -Infinity;
+      const av = sortKey === 'workflow_title' ? a.workflow_title : a.total_count;
+      const bv = sortKey === 'workflow_title' ? b.workflow_title : b.total_count;
       if (av < bv) return sortDir === 'asc' ? -1 : 1;
       if (av > bv) return sortDir === 'asc' ? 1 : -1;
       return 0;
@@ -163,16 +167,6 @@ export default function RunAnalyticsPage() {
     if (sortKey !== key) return ' ↕';
     return sortDir === 'asc' ? ' ↑' : ' ↓';
   }
-
-  const columns: { label: string; key: SortKey; format?: (v: any) => string }[] = [
-    { label: 'Workflow Title', key: 'workflow_title' },
-    { label: 'Total Runs', key: 'total_count' },
-    { label: 'Completed', key: 'completed_count' },
-    { label: 'Unsuccessful', key: 'unsuccessful_count' },
-    { label: 'Avg Run Time', key: 'avg_run_time_seconds', format: formatDuration },
-    { label: 'Max Run Time', key: 'max_run_time_seconds', format: formatDuration },
-    { label: 'Min Run Time', key: 'min_run_time_seconds', format: formatDuration },
-  ];
 
   return (
     <div style={{ padding: '24px', maxWidth: '1200px' }}>
@@ -315,43 +309,51 @@ export default function RunAnalyticsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: '#f3f4f6' }}>
-                {columns.map((col) => (
-                  <th
-                    key={col.key}
-                    onClick={() => handleSort(col.key)}
-                    style={{
-                      padding: '8px 12px',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                      borderBottom: '2px solid #d1d5db',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {col.label}{arrow(col.key)}
-                  </th>
-                ))}
+                <th
+                  onClick={() => handleSort('workflow_title')}
+                  style={{ padding: '8px 12px', textAlign: 'left', cursor: 'pointer', userSelect: 'none', borderBottom: '2px solid #d1d5db', whiteSpace: 'nowrap' }}
+                >
+                  Workflow Title{arrow('workflow_title')}
+                </th>
+                <th
+                  onClick={() => handleSort('total_count')}
+                  style={{ padding: '8px 12px', textAlign: 'left', cursor: 'pointer', userSelect: 'none', borderBottom: '2px solid #d1d5db', whiteSpace: 'nowrap' }}
+                >
+                  Count{arrow('total_count')}
+                </th>
+                <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '2px solid #d1d5db', whiteSpace: 'nowrap' }}>Avg Run Time</th>
+                <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '2px solid #d1d5db', whiteSpace: 'nowrap' }}>Max Run Time</th>
+                <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '2px solid #d1d5db', whiteSpace: 'nowrap' }}>Min Run Time</th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((s, i) => (
-                <tr
-                  key={s.workflow_title}
-                  style={{ background: i % 2 === 0 ? '#ffffff' : '#f9fafb' }}
-                >
-                  {columns.map((col) => {
-                    const raw = s[col.key];
-                    const display = col.format ? col.format(raw) : String(raw ?? '');
-                    return (
-                      <td
-                        key={col.key}
-                        style={{ padding: '7px 12px', borderBottom: '1px solid #e5e7eb' }}
-                      >
-                        {display}
+                <>
+                  {/* Master row */}
+                  <tr key={s.workflow_title} style={{ background: i % 2 === 0 ? '#eef2ff' : '#e0e7ff' }}>
+                    <td style={{ padding: '7px 12px', fontWeight: 600, borderBottom: '1px solid #d1d5db' }}>
+                      {s.workflow_title}
+                    </td>
+                    <td style={{ padding: '7px 12px', fontWeight: 600, borderBottom: '1px solid #d1d5db' }}>
+                      {s.total_count}
+                    </td>
+                    <td style={{ padding: '7px 12px', borderBottom: '1px solid #d1d5db' }} />
+                    <td style={{ padding: '7px 12px', borderBottom: '1px solid #d1d5db' }} />
+                    <td style={{ padding: '7px 12px', borderBottom: '1px solid #d1d5db' }} />
+                  </tr>
+                  {/* Status sub-rows */}
+                  {s.status_rows.map((r) => (
+                    <tr key={`${s.workflow_title}-${r.status}`} style={{ background: i % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                      <td style={{ padding: '6px 12px 6px 28px', color: '#374151', borderBottom: '1px solid #e5e7eb' }}>
+                        {r.status}
                       </td>
-                    );
-                  })}
-                </tr>
+                      <td style={{ padding: '6px 12px', borderBottom: '1px solid #e5e7eb' }}>{r.count}</td>
+                      <td style={{ padding: '6px 12px', borderBottom: '1px solid #e5e7eb' }}>{formatDuration(r.avg_run_time_seconds)}</td>
+                      <td style={{ padding: '6px 12px', borderBottom: '1px solid #e5e7eb' }}>{formatDuration(r.max_run_time_seconds)}</td>
+                      <td style={{ padding: '6px 12px', borderBottom: '1px solid #e5e7eb' }}>{formatDuration(r.min_run_time_seconds)}</td>
+                    </tr>
+                  ))}
+                </>
               ))}
             </tbody>
           </table>
