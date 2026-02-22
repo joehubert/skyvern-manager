@@ -193,6 +193,7 @@ export interface WorkflowStatusRow {
 
 export interface WorkflowRunSummary {
   workflow_title: string;
+  workflow_permanent_id: string;
   total_count: number;
   status_rows: WorkflowStatusRow[];
 }

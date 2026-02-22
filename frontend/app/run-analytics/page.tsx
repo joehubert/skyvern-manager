@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   getRunAnalyticsSettings,
   saveRunAnalyticsSettings,
@@ -328,9 +328,9 @@ export default function RunAnalyticsPage() {
             </thead>
             <tbody>
               {sorted.map((s, i) => (
-                <>
+                <React.Fragment key={s.workflow_permanent_id}>
                   {/* Master row */}
-                  <tr key={s.workflow_title} style={{ background: i % 2 === 0 ? '#eef2ff' : '#e0e7ff' }}>
+                  <tr style={{ background: i % 2 === 0 ? '#eef2ff' : '#e0e7ff' }}>
                     <td style={{ padding: '7px 12px', fontWeight: 600, borderBottom: '1px solid #d1d5db' }}>
                       {s.workflow_title}
                     </td>
@@ -343,7 +343,7 @@ export default function RunAnalyticsPage() {
                   </tr>
                   {/* Status sub-rows */}
                   {s.status_rows.map((r) => (
-                    <tr key={`${s.workflow_title}-${r.status}`} style={{ background: i % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                    <tr key={`${s.workflow_permanent_id}-${r.status}`} style={{ background: i % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
                       <td style={{ padding: '6px 12px 6px 28px', color: '#374151', borderBottom: '1px solid #e5e7eb' }}>
                         {r.status}
                       </td>
@@ -353,7 +353,7 @@ export default function RunAnalyticsPage() {
                       <td style={{ padding: '6px 12px', borderBottom: '1px solid #e5e7eb' }}>{formatDuration(r.min_run_time_seconds)}</td>
                     </tr>
                   ))}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           </table>

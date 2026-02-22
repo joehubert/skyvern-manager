@@ -166,8 +166,12 @@ export function aggregateRuns(runs: SkyvernWorkflowRun[]): WorkflowRunSummary[] 
 
     status_rows.sort((a, b) => b.count - a.count);
 
+    // Use the first run's workflow_permanent_id for this group
+    const workflow_permanent_id = group[0]?.workflow_permanent_id ?? '';
+
     summaries.push({
       workflow_title,
+      workflow_permanent_id,
       total_count: group.length,
       status_rows,
     });
