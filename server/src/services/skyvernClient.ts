@@ -76,6 +76,46 @@ async function fetchAllForFolder(
   return results;
 }
 
+export async function fetchWorkflow(workflowPermanentId: string): Promise<RawWorkflow> {
+  const baseUrl = process.env.SKYVERN_BASE_URL ?? 'https://api.skyvern.com/v1';
+  const apiKey = process.env.SKYVERN_API_KEY ?? '';
+
+  const response = await axios.get<RawWorkflow>(
+    `${baseUrl}/workflows/${encodeURIComponent(workflowPermanentId)}`,
+    { headers: { 'x-api-key': apiKey } }
+  );
+  return response.data;
+}
+
+export async function updateWorkflowDescription(
+  workflowPermanentId: string,
+  description: string
+): Promise<RawWorkflow> {
+  const current = await fetchWorkflow(workflowPermanentId);
+
+  const baseUrl = process.env.SKYVERN_BASE_URL ?? 'https://api.skyvern.com/v1';
+  const apiKey = process.env.SKYVERN_API_KEY ?? '';
+
+  const response = await axios.post<RawWorkflow>(
+    `${baseUrl}/workflows/${encodeURIComponent(workflowPermanentId)}`,
+    {
+      json_definition: {
+        title: current.title,
+        description,
+        workflow_definition: {
+          ...current.workflow_definition,
+          // Output parameters are managed by the API and cannot be sent manually
+          parameters: current.workflow_definition.parameters.filter(
+            (p) => p.parameter_type !== 'output'
+          ),
+        },
+      },
+    },
+    { headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' } }
+  );
+  return response.data;
+}
+
 export async function fetchAllWorkflows(filterConfig: FilterConfig): Promise<RawWorkflow[]> {
   const queryParams = buildQueryParams(filterConfig);
 

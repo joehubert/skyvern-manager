@@ -71,6 +71,17 @@ export async function getWorkflows(): Promise<Record<string, unknown>[]> {
   return fetchJson<Record<string, unknown>[]>('/api/workflows');
 }
 
+export async function updateWorkflowDescription(
+  workflowId: string,
+  description: string
+): Promise<void> {
+  await fetchJson(`/api/workflows/${encodeURIComponent(workflowId)}/description`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ description }),
+  });
+}
+
 export async function exportPdf(): Promise<Blob> {
   const res = await fetch('/api/export/pdf', { method: 'POST' });
   if (!res.ok) {

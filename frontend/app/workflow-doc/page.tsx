@@ -5,6 +5,7 @@ import ConfigEditor from '../../components/ConfigEditor';
 import TemplateEditor from '../../components/TemplateEditor';
 import DocToolbar from '../../components/DocToolbar';
 import WorkflowDocPreview from '../../components/WorkflowDocPreview';
+import EditDescriptionModal from '../../components/EditDescriptionModal';
 import {
   getFilterConfig,
   saveFilterConfig,
@@ -13,6 +14,7 @@ import {
   getTemplate,
   saveTemplate,
   getWorkflows,
+  updateWorkflowDescription,
 } from '../../lib/api';
 import { renderAllWorkflows } from '../../lib/templateRenderer';
 import styles from './page.module.css';
@@ -43,6 +45,7 @@ export default function WorkflowDocPage() {
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
+  const [editingWorkflow, setEditingWorkflow] = useState<Record<string, unknown> | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useCallback((message: string, type: 'success' | 'error') => {
@@ -139,6 +142,27 @@ export default function WorkflowDocPage() {
     }
   };
 
+  const handleSaveDescription = async (description: string) => {
+    if (!editingWorkflow) return;
+    const rawId = editingWorkflow.workflow_permanent_id;
+    const workflowId = typeof rawId === 'string' ? rawId : '';
+    try {
+      await updateWorkflowDescription(workflowId, description);
+      setWorkflows(prev =>
+        prev.map(w =>
+          w.workflow_permanent_id === editingWorkflow.workflow_permanent_id
+            ? { ...w, description }
+            : w
+        )
+      );
+      setEditingWorkflow(null);
+      showToast('Description updated', 'success');
+    } catch (err) {
+      showToast(`Failed to update description: ${(err as Error).message}`, 'error');
+      throw err; // keep modal open on error
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -200,9 +224,19 @@ export default function WorkflowDocPage() {
             template={templateStr}
             isLoading={isRefreshing}
             error={previewError}
+            onEditDescription={setEditingWorkflow}
           />
         </div>
       </div>
+
+      {editingWorkflow && (
+        <EditDescriptionModal
+          workflowTitle={typeof editingWorkflow.title === 'string' ? editingWorkflow.title : 'Untitled Workflow'}
+          initialDescription={typeof editingWorkflow.description === 'string' ? editingWorkflow.description : ''}
+          onSave={handleSaveDescription}
+          onClose={() => setEditingWorkflow(null)}
+        />
+      )}
 
       {toast && (
         <div className={`${styles.toast} ${styles[toast.type]}`}>
