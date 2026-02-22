@@ -41,10 +41,6 @@ function formatDateTime(iso: string | null): string {
   return new Date(iso).toLocaleString();
 }
 
-function truncateRunId(id: string): string {
-  return id.length > 12 ? '...' + id.slice(-12) : id;
-}
-
 // Autocomplete: get suggested keys from an object given a partial dot-path
 function getSuggestions(run: Record<string, unknown>, input: string): string[] {
   try {
@@ -510,10 +506,11 @@ export default function WorkflowRunExplorerPage() {
                           fontFamily: 'monospace',
                           fontSize: '0.8rem',
                           color: '#1d4ed8',
+                          wordBreak: 'break-all',
                         }}
                         title={run.workflow_run_id}
                       >
-                        {truncateRunId(run.workflow_run_id)}
+                        {run.workflow_run_id}
                       </td>
                       <td style={{ padding: '7px 10px', color: '#374151' }}>
                         {run.workflow_title ?? '—'}
