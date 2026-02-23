@@ -114,3 +114,44 @@ skyvern-manager/
 ├── package.json              # Root scripts (dev, build, install:all)
 └── README.md
 ```
+
+
+## Corporate Proxy / SSL Setup (Server)
+
+If you are running this project behind a corporate firewall (AVD/VPN) and see `AxiosError: self-signed certificate`, follow these steps in the `server` directory.
+
+### 1. Export the Corporate Root Certificate
+1.  Open Chrome/Edge and navigate to `https://skyvern.com`.
+2.  Click the **Lock icon (🔒)** in the address bar $\to$ **Connection is secure** $\to$ **Certificate is valid**.
+3.  Go to the **Certification Path** (or Details) tab.
+4.  Select the **top-most** certificate in the hierarchy (e.g., *Zscaler*, *Fortinet*, or *Internal CA*). **Do not** select `skyvern.com`.
+5.  Click **Export** (or View Certificate $\to$ Details $\to$ Copy to File).
+6.  Select format: **Base-64 encoded X.509 (.CER/.PEM)**.
+7.  Save the file as `corporate-ca.pem` inside the `server` folder.
+
+### 2. Install Cross-Env
+Open your terminal, navigate to the server directory, and install the helper tool:
+
+```bash
+cd server
+npm install -D cross-env
+```
+
+### 3. Add the Dev Script
+Open `server/package.json` and add the `dev-cert` script to the `"scripts"` section.
+
+*Note: This assumes you placed the certificate file directly in the `server` folder.*
+
+```json
+"scripts": {
+  "dev": "tsx watch src/index.ts",
+  "dev-cert": "cross-env NODE_EXTRA_CA_CERTS=./corporate-ca.pem tsx watch src/index.ts"
+}
+```
+
+### 4. Run the Server
+Use the new command to start the server with the certificate trusted:
+
+```bash
+npm run dev-cert
+```
